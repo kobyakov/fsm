@@ -35,7 +35,7 @@ namespace SML
     {
         this->name = FSMName;
         this->initialState = initState;
-        this->currentState = initialState;
+        this->currentState = initState;
         this->result = FSMBool::FSM_FALSE;
     }
 
