@@ -34,9 +34,6 @@ namespace SML
     FSM::FSM(std::string FSMName, State* initState)
     {
         this->name = FSMName;
-        this->inputBuffer[0] = '\0';
-        this->inputBufferSize = 0;
-        this->inputBufferCursor = 0;
         this->initialState = initState;
         this->currentState = initialState;
         this->result = FSMBool::FSM_FALSE;

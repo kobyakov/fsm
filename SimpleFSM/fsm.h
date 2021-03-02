@@ -8,9 +8,6 @@
 
 namespace SML
 {
-
-    const size_t MAX_INP_BUFFER_LEN = 128;
-
     enum class FSMError
     {
         FSM_NO_TRANSITION,
@@ -40,9 +37,6 @@ namespace SML
     {
     public:
         std::string name;
-        char inputBuffer[MAX_INP_BUFFER_LEN];
-        size_t inputBufferSize;
-        size_t inputBufferCursor;
         State* initialState;
         State* currentState;
         FSMBool result;
