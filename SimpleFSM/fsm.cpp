@@ -10,10 +10,10 @@
 #define PRINT_DEBUG 0
 #endif
 
-#define debug_printf(fmt, ...)                  \
-    do {                                        \
-        if (PRINT_DEBUG)                        \
-            fprintf(stderr, fmt, ##__VA_ARGS__);  \
+#define debug_printf(fmt, ...)                   \
+    do {                                         \
+        if (PRINT_DEBUG)                         \
+            fprintf(stderr, fmt, ##__VA_ARGS__); \
     } while (0)
 
 
@@ -35,7 +35,7 @@ namespace SML
     {
         this->name = FSMName;
         this->initialState = initState;
-        this->currentState = initialState;
+        this->currentState = initState;
         this->result = FSMBool::FSM_FALSE;
     }
 
