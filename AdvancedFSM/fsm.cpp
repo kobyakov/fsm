@@ -19,10 +19,11 @@
 
 namespace SML
 {
-    State::State(std::string stateName, FSMBool finalFlag) 
-        : name(stateName), 
-          isFinal(finalFlag),
-          table() 
+    State::State(std::string name, FSMBool isFinal, outputFn output) 
+        : name(name), 
+          isFinal(isFinal),
+          table(),
+          outputFunction(output)
     {}
 
     void State::insertNewEntry(std::string key, State* nextState)
@@ -49,6 +50,8 @@ namespace SML
             return nullptr;
         }
         debug_printf("New state: %s.\n", it->second->name.c_str());
+        if (this->currentState->outputFunction)
+            (this->currentState->outputFunction)(this->currentState, it->second, &this->output);
         return it->second;
 
     }
@@ -56,6 +59,7 @@ namespace SML
     FSMError FSM::execute(const std::string& inputString)
     {
         assert(this->initialState);
+        this->output.clear();
 
         debug_printf("Process string: %s\n", inputString.c_str());
         

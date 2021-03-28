@@ -1,4 +1,5 @@
 #include <fsm.h>
+#include <iostream>
 
 using namespace SML;
 
@@ -12,13 +13,20 @@ do {                                                    \
             printf("FSM execution error\n");            \
 } while(0)
 
+
+void transitionOutputFunction(State* cur, State* next, outputBuffer* buf)
+{
+    buf->push_back("Transition: from " + cur->name + " to " + next->name);
+}
+
+
 int main()
 {
 
-    State stateQ0("q0");
-    State stateQ1("q1", FSMBool::FSM_TRUE);
-    State stateQ2("q2", FSMBool::FSM_TRUE);
-    State stateD("D");
+    State stateQ0("q0", FSMBool::FSM_FALSE, transitionOutputFunction);
+    State stateQ1("q1", FSMBool::FSM_TRUE,  transitionOutputFunction);
+    State stateQ2("q2", FSMBool::FSM_TRUE,  transitionOutputFunction);
+    State stateD( "D",  FSMBool::FSM_FALSE, transitionOutputFunction);
 
     stateQ0.insertNewEntry("1", &stateQ1);
     stateQ0.insertNewEntry("0", &stateQ2);
@@ -38,11 +46,13 @@ int main()
         std::string test("01010101");
         printf("Check string %s: ", test.c_str());
         CHECK_FSM_RESULT(sm.execute(test));
+        for (auto s : sm.output) std::cout << s << std::endl;
     }
     {
         std::string test("01010111");
         printf("Check string %s: ", test.c_str());
         CHECK_FSM_RESULT(sm.execute(test));
+        for (auto s : sm.output) std::cout << s << std::endl;
     }   
     return 0;
 }
