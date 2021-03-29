@@ -30,6 +30,7 @@ namespace SML
     struct transitionTableEntry {
         std::string key;
         State* nextState;
+        outputFn outputFunction;
     };
 
     using transitionTable = std::vector<transitionTableEntry>;
@@ -39,9 +40,8 @@ namespace SML
         std::string name;
         FSMBool isFinal;
         transitionTable table;
-        outputFn outputFunction;
-        State(std::string name, FSMBool isFinal = FSMBool::FSM_FALSE, outputFn output=nullptr);       
-        void insertNewEntry(std::string key, State* nextState);
+        State(std::string name, FSMBool isFinal = FSMBool::FSM_FALSE);       
+        void insertNewEntry(std::string key, State* nextState, outputFn fn=nullptr);
     };
 
     class FSM
@@ -55,8 +55,8 @@ namespace SML
         FSMBool result;
         FSM(std::string name, State* initState);
 
-        State* findNextState(const std::string& inputString);
-        void applyTransition(State* nextState);
+        const transitionTableEntry* findTransition(const std::string& inputString);
+        void applyTransition(const transitionTableEntry* transition);
         FSMError execute(const std::string& buffer);
     };
 

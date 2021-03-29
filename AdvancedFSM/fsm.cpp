@@ -20,17 +20,16 @@
 
 namespace SML
 {
-    State::State(std::string name, FSMBool isFinal, outputFn output) 
+    State::State(std::string name, FSMBool isFinal) 
         : name(name), 
           isFinal(isFinal),
-          table(),
-          outputFunction(output)
+          table()
     {}
 
-    void State::insertNewEntry(std::string key, State* nextState)
+    void State::insertNewEntry(std::string key, State* nextState, outputFn outputFunction)
     {
         debug_printf("state: %s, insert transition %s - %s\n", this->name.c_str(), key.c_str(), nextState->name.c_str());
-        this->table.push_back({key, nextState});
+        this->table.push_back({key, nextState, outputFunction});
     }
 
     FSM::FSM(std::string FSMName, State* initState)
@@ -41,10 +40,9 @@ namespace SML
         this->result = FSMBool::FSM_FALSE;
     }
 
-    State* FSM::findNextState(const std::string& inputString)
+    const transitionTableEntry* FSM::findTransition(const std::string& inputString)
     {
-        State* nextState = nullptr;
-        for (const auto& row : this->currentState->table)
+        for (const transitionTableEntry& row : this->currentState->table)
         {
             const std::string& key = row.key;
             size_t keySize = key.length();
@@ -58,22 +56,22 @@ namespace SML
             if (substring == key)
             {
                 this->currentCursor += keySize;
-                nextState = row.nextState;
-                debug_printf("Found next state: %s\n", nextState->name.c_str());
-                break;
+                debug_printf("Found transition with next state: %s\n", row.nextState->name.c_str());
+                return &row;
             }
         }
-        return nextState;
+        return nullptr;
     }
 
-    void FSM::applyTransition(State* nextState)
+    void FSM::applyTransition(const transitionTableEntry* transition)
     {
+        if (transition->outputFunction)
+            transition->outputFunction(this->currentState, transition->nextState, &this->output);
+
         debug_printf("Apply transition: current: %s, new: %s\n", 
             this->currentState->name.c_str(), 
-            nextState->name.c_str());
-        if (this->currentState->outputFunction)
-            (this->currentState->outputFunction)(this->currentState, nextState, &this->output);
-        this->currentState = nextState;
+            transition->nextState->name.c_str());
+        this->currentState = transition->nextState;
 
     }
 
@@ -88,10 +86,10 @@ namespace SML
         while(this->currentCursor < inputString.length())
         {
             debug_printf("Current state: %s Cursor: %zu\n", this->currentState->name.c_str(), this->currentCursor);
-            State* nextState = this->findNextState(inputString);
-            if (!nextState)
+            const transitionTableEntry* tr = this->findTransition(inputString);
+            if (!tr)
                 return FSMError::FSM_NO_TRANSITION;
-            this->applyTransition(nextState);
+            this->applyTransition(tr);
         }
 
         this->result = currentState->isFinal;

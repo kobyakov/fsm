@@ -13,45 +13,30 @@ do {                                                    \
             printf("FSM execution error\n");            \
 } while(0)
 
+void produceOutput(const State* cur, const State* next, outputBuffer* buf)
+{
+    buf->push_back("Transition: from " + cur->name + " to " + next->name);
+}
 
 int main()
 {
 
-    State stateQ0(
-        "q0", FSMBool::FSM_FALSE, 
-        [](const State* cur, const State* next, outputBuffer* buf){
-            buf->push_back("Transition: from " + cur->name + " to " + next->name);
-        });
-    State stateQ1(
-        "q1", FSMBool::FSM_TRUE,          
-        [](const State* cur, const State* next, outputBuffer* buf){
-            buf->push_back("Transition: from " + cur->name + " to " + next->name);
-        }
-    );
-    State stateQ2(
-        "q2", FSMBool::FSM_TRUE,  
-        [](const State* cur, const State* next, outputBuffer* buf){
-            buf->push_back("Transition: from " + cur->name + " to " + next->name);
-        }
-    );
-    State stateD(
-        "D",  FSMBool::FSM_FALSE,
-        [](const State* cur, const State* next, outputBuffer* buf){
-            buf->push_back("Transition: from " + cur->name + " to " + next->name);
-        }
-    );
+    State stateQ0("q0", FSMBool::FSM_FALSE);
+    State stateQ1("q1", FSMBool::FSM_TRUE);
+    State stateQ2("q2", FSMBool::FSM_TRUE);
+    State stateD("D",  FSMBool::FSM_FALSE);
 
-    stateQ0.insertNewEntry("1", &stateQ1);
-    stateQ0.insertNewEntry("0", &stateQ2);
+    stateQ0.insertNewEntry("1", &stateQ1, produceOutput);
+    stateQ0.insertNewEntry("0", &stateQ2, produceOutput);
 
-    stateQ1.insertNewEntry("1", &stateD);
-    stateQ1.insertNewEntry("0", &stateQ2);
+    stateQ1.insertNewEntry("1", &stateD, produceOutput);
+    stateQ1.insertNewEntry("0", &stateQ2, produceOutput);
 
-    stateQ2.insertNewEntry("1", &stateQ1);
-    stateQ2.insertNewEntry("0", &stateD);
+    stateQ2.insertNewEntry("1", &stateQ1, produceOutput);
+    stateQ2.insertNewEntry("0", &stateD, produceOutput);
 
-    stateD.insertNewEntry("0", &stateD);
-    stateD.insertNewEntry("1", &stateD);
+    stateD.insertNewEntry("0", &stateD, produceOutput);
+    stateD.insertNewEntry("1", &stateD, produceOutput);
 
     FSM sm("BitFlipper", &stateQ0);
 
