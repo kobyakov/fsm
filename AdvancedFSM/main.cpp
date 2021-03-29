@@ -18,6 +18,26 @@ void produceOutput(const State* cur, const State* next, outputBuffer* buf)
     buf->push_back("Transition: from " + cur->name + " to " + next->name);
 }
 
+bool matchFor0(const std::string_view& input, size_t& read)
+{
+    if (input.at(0) == '0')
+    {
+        read = 1;
+        return true;
+    }
+    return false;
+}
+
+bool matchFor1(const std::string_view& input, size_t& read)
+{
+    if (input.at(0) == '1')
+    {
+        read = 1;
+        return true;
+    }
+    return false;
+}
+
 int main()
 {
 
@@ -26,17 +46,17 @@ int main()
     State stateQ2("q2", FSMBool::FSM_TRUE);
     State stateD("D",  FSMBool::FSM_FALSE);
 
-    stateQ0.insertNewEntry("1", &stateQ1, produceOutput);
-    stateQ0.insertNewEntry("0", &stateQ2, produceOutput);
+    stateQ0.insertNewEntry(&stateQ1, {matchFor1}, produceOutput);
+    stateQ0.insertNewEntry(&stateQ2, {matchFor0}, produceOutput);
 
-    stateQ1.insertNewEntry("1", &stateD, produceOutput);
-    stateQ1.insertNewEntry("0", &stateQ2, produceOutput);
+    stateQ1.insertNewEntry(&stateD,  {matchFor1}, produceOutput);
+    stateQ1.insertNewEntry(&stateQ2, {matchFor0}, produceOutput);
 
-    stateQ2.insertNewEntry("1", &stateQ1, produceOutput);
-    stateQ2.insertNewEntry("0", &stateD, produceOutput);
+    stateQ2.insertNewEntry(&stateQ1, {matchFor1}, produceOutput);
+    stateQ2.insertNewEntry(&stateD,  {matchFor0}, produceOutput);
 
-    stateD.insertNewEntry("0", &stateD, produceOutput);
-    stateD.insertNewEntry("1", &stateD, produceOutput);
+    stateD.insertNewEntry(&stateD, {matchFor0}, produceOutput);
+    stateD.insertNewEntry(&stateD, {matchFor1}, produceOutput);
 
     FSM sm("BitFlipper", &stateQ0);
 

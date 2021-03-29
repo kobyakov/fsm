@@ -24,13 +24,14 @@ namespace SML
 
     using outputBuffer = std::vector<std::string>;
     typedef void (*outputFn)(const State *currentState, const State* nextState, outputBuffer* output);
+    typedef bool (*inputMatchFn)(const std::string_view& input, size_t& read);
 
     using TransitionTableKey = std::string;
 
     struct transitionTableEntry {
-        std::string key;
-        State* nextState;
+        std::vector<inputMatchFn> inputMatchFunctions;
         outputFn outputFunction;
+        State* nextState;    
     };
 
     using transitionTable = std::vector<transitionTableEntry>;
@@ -41,7 +42,11 @@ namespace SML
         FSMBool isFinal;
         transitionTable table;
         State(std::string name, FSMBool isFinal = FSMBool::FSM_FALSE);       
-        void insertNewEntry(std::string key, State* nextState, outputFn fn=nullptr);
+        void insertNewEntry(
+            State* nextState,
+            std::vector<inputMatchFn> mFns,
+            outputFn fn = nullptr
+        );
     };
 
     class FSM

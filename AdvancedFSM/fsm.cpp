@@ -26,10 +26,10 @@ namespace SML
           table()
     {}
 
-    void State::insertNewEntry(std::string key, State* nextState, outputFn outputFunction)
+    void State::insertNewEntry(State* nextState, std::vector<inputMatchFn> inputFunctions, outputFn outputFunction)
     {
-        debug_printf("state: %s, insert transition %s - %s\n", this->name.c_str(), key.c_str(), nextState->name.c_str());
-        this->table.push_back({key, nextState, outputFunction});
+        debug_printf("state: %s, insert transition  to %s\n", this->name.c_str(), nextState->name.c_str());
+        this->table.push_back({inputFunctions, outputFunction, nextState});
     }
 
     FSM::FSM(std::string FSMName, State* initState)
@@ -44,22 +44,27 @@ namespace SML
     {
         for (const transitionTableEntry& row : this->currentState->table)
         {
-            const std::string& key = row.key;
-            size_t keySize = key.length();
-            debug_printf("Key now: '%s', keySize: %zu.\n", key.c_str(), keySize);
-            if (this->currentCursor + keySize > inputString.length())
+            const std::vector<inputMatchFn> &inputFunctions = row.inputMatchFunctions;
+            size_t read = 0;
+            bool isMatched = false;
+            const std::string_view substring = inputString.substr(this->currentCursor);
+            for (const inputMatchFn& fn : inputFunctions)
             {
-                debug_printf("This key too much, continue.\n");
-                continue;
+                isMatched = fn(substring, read);
+                if (isMatched)
+                {
+                    debug_printf("Matched: read = %zu", read);
+                    break;
+                }
             }
-            const std::string_view substring = inputString.substr(this->currentCursor, keySize);
-            if (substring == key)
+            if (isMatched)
             {
-                this->currentCursor += keySize;
+                this->currentCursor += read;
                 debug_printf("Found transition with next state: %s\n", row.nextState->name.c_str());
                 return &row;
             }
         }
+        debug_printf("No transition for current state: %s\n", this->currentState->name.c_str());
         return nullptr;
     }
 
