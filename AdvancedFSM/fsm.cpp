@@ -30,7 +30,7 @@ namespace SML
     void State::insertNewEntry(std::string key, State* nextState)
     {
         debug_printf("state: %s, insert transition %s - %s\n", this->name.c_str(), key.c_str(), nextState->name.c_str());
-        this->table.insert({key, nextState});
+        this->table.push_back({key, nextState});
     }
 
     FSM::FSM(std::string FSMName, State* initState)
@@ -46,7 +46,7 @@ namespace SML
         State* nextState = nullptr;
         for (const auto& row : this->currentState->table)
         {
-            const std::string& key = row.first;
+            const std::string& key = row.key;
             size_t keySize = key.length();
             debug_printf("Key now: '%s', keySize: %zu.\n", key.c_str(), keySize);
             if (this->currentCursor + keySize > inputString.length())
@@ -58,7 +58,7 @@ namespace SML
             if (substring == key)
             {
                 this->currentCursor += keySize;
-                nextState = row.second;
+                nextState = row.nextState;
                 debug_printf("Found next state: %s\n", nextState->name.c_str());
                 break;
             }

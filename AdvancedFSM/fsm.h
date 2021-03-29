@@ -26,13 +26,19 @@ namespace SML
     typedef void (*outputFn)(const State *currentState, const State* nextState, outputBuffer* output);
 
     using TransitionTableKey = std::string;
-    using TransitionTable = std::unordered_map<TransitionTableKey, State*>;
+
+    struct transitionTableEntry {
+        std::string key;
+        State* nextState;
+    };
+
+    using transitionTable = std::vector<transitionTableEntry>;
     
     class State {
     public:
         std::string name;
         FSMBool isFinal;
-        TransitionTable table;
+        transitionTable table;
         outputFn outputFunction;
         State(std::string name, FSMBool isFinal = FSMBool::FSM_FALSE, outputFn output=nullptr);       
         void insertNewEntry(std::string key, State* nextState);
