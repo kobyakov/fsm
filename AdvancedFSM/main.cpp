@@ -19,24 +19,24 @@ int main()
 
     State stateQ0(
         "q0", FSMBool::FSM_FALSE, 
-        [](State* cur, State* next, outputBuffer* buf){
+        [](const State* cur, const State* next, outputBuffer* buf){
             buf->push_back("Transition: from " + cur->name + " to " + next->name);
         });
     State stateQ1(
         "q1", FSMBool::FSM_TRUE,          
-        [](State* cur, State* next, outputBuffer* buf){
+        [](const State* cur, const State* next, outputBuffer* buf){
             buf->push_back("Transition: from " + cur->name + " to " + next->name);
         }
     );
     State stateQ2(
         "q2", FSMBool::FSM_TRUE,  
-        [](State* cur, State* next, outputBuffer* buf){
+        [](const State* cur, const State* next, outputBuffer* buf){
             buf->push_back("Transition: from " + cur->name + " to " + next->name);
         }
     );
     State stateD(
         "D",  FSMBool::FSM_FALSE,
-        [](State* cur, State* next, outputBuffer* buf){
+        [](const State* cur, const State* next, outputBuffer* buf){
             buf->push_back("Transition: from " + cur->name + " to " + next->name);
         }
     );

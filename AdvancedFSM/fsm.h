@@ -23,7 +23,7 @@ namespace SML
     class State;
 
     using outputBuffer = std::vector<std::string>;
-    typedef void (*outputFn)(State *currentState, State* nextState, outputBuffer* output);
+    typedef void (*outputFn)(const State *currentState, const State* nextState, outputBuffer* output);
 
     using TransitionTableKey = std::string;
     using TransitionTable = std::unordered_map<TransitionTableKey, State*>;
@@ -42,12 +42,15 @@ namespace SML
     {
     public:
         std::string name;
+        size_t currentCursor;
         outputBuffer output;
         State* initialState;
         State* currentState;
         FSMBool result;
         FSM(std::string name, State* initState);
-        State* applyTransition(const char& key);
+
+        State* findNextState(const std::string& inputString);
+        void applyTransition(State* nextState);
         FSMError execute(const std::string& buffer);
     };
 
