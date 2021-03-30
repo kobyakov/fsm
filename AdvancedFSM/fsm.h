@@ -16,8 +16,9 @@ namespace SML
 
     class State;
 
+    using inputBuffer = std::string_view;
     using outputBuffer = std::vector<std::string>;
-    typedef void (*outputFn)(const State *currentState, const State* nextState, outputBuffer* output);
+    typedef void (*outputFn)(const State *currentState, const State* nextState, const inputBuffer& input, outputBuffer* output);
     typedef bool (*inputMatchFn)(const std::string_view& input, size_t& read);
 
     using TransitionTableKey = std::string;
@@ -54,8 +55,8 @@ namespace SML
         bool result;
         FSM(std::string name, State* initState);
 
-        const transitionTableEntry* findTransition(const std::string& inputString);
-        void applyTransition(const transitionTableEntry* transition);
+        const transitionTableEntry* findTransition(const std::string& inputString, size_t& read);
+        void applyTransition(const transitionTableEntry* transition, const std::string_view& matched);
         FSMError execute(const std::string& buffer);
     };
 

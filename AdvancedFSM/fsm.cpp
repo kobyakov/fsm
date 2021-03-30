@@ -17,7 +17,6 @@
             fprintf(stderr, fmt, ##__VA_ARGS__);  \
     } while (0)
 
-
 namespace SML
 {
     State::State(std::string name, bool isFinal) 
@@ -40,12 +39,11 @@ namespace SML
         this->result = false;
     }
 
-    const transitionTableEntry* FSM::findTransition(const std::string& inputString)
+    const transitionTableEntry* FSM::findTransition(const std::string& inputString, size_t &read)
     {
         for (const transitionTableEntry& row : this->currentState->table)
         {
             const std::vector<inputMatchFn> &inputFunctions = row.inputMatchFunctions;
-            size_t read = 0;
             bool isMatched = false;
             //debug_printf("Current cursor: %zu\n", this->currentCursor);
 
@@ -63,7 +61,6 @@ namespace SML
             }
             if (isMatched)
             {
-                this->currentCursor += read;
                 debug_printf("Found transition with next state: %s\n", row.nextState->name.c_str());
                 return &row;
             }
@@ -73,10 +70,10 @@ namespace SML
         return nullptr;
     }
 
-    void FSM::applyTransition(const transitionTableEntry* transition)
+    void FSM::applyTransition(const transitionTableEntry* transition, const std::string_view& matched)
     {
         if (transition->outputFunction)
-            transition->outputFunction(this->currentState, transition->nextState, &this->output);
+            transition->outputFunction(this->currentState, transition->nextState, matched, &this->output);
 
         debug_printf("Apply transition: current: %s, new: %s\n", 
             this->currentState->name.c_str(), 
@@ -97,10 +94,13 @@ namespace SML
         while(this->currentCursor < inputString.length())
         {
             debug_printf("Current state: %s Cursor: %zu\n", this->currentState->name.c_str(), this->currentCursor);
-            const transitionTableEntry* tr = this->findTransition(inputString);
+            size_t read = 0;
+            const transitionTableEntry* tr = this->findTransition(inputString, read);
             if (!tr)
                 return FSMError::FSM_NO_TRANSITION;
-            this->applyTransition(tr);
+                        
+            this->applyTransition(tr, std::string_view(inputString).substr(this->currentCursor, read));
+            this->currentCursor += read;    
         }
 
         this->result = currentState->isFinal;

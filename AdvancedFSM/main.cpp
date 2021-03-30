@@ -13,7 +13,7 @@ do {                                                    \
             printf("FSM execution error\n");            \
 } while(0)
 
-void produceOutput(const State* cur, const State* next, outputBuffer* buf)
+void produceOutput(const State* cur, const State* next, const inputBuffer& input, outputBuffer* buf)
 {
     buf->push_back("Transition: from " + cur->name + " to " + next->name);
 }
@@ -202,14 +202,164 @@ void emailValidatorExample()
         printf("Check string %s: ", test.c_str());
         CHECK_FSM_RESULT(sm.execute(test));
     }
+}
 
+void converterOutput(const State* cur, const State* next, const inputBuffer& input, outputBuffer* buf)
+{
+    if (input == "0000")
+    {
+        buf->push_back("0");
+        return;
+    }
+    if (input == "0001")
+    {
+        buf->push_back("1");
+        return;
+    }
+    if (input == "0010")
+    {
+        buf->push_back("2");
+        return;
+    }
+    if (input == "0011")
+    {
+        buf->push_back("3");
+        return;
+    }
+    if (input == "0100")
+    {
+        buf->push_back("4");
+        return;
+    }
+    if (input == "0101")
+    {
+        buf->push_back("5");
+        return;
+    }
+    if (input == "0110")
+    {
+        buf->push_back("6");
+        return;
+    }
+    if (input == "0111")
+    {
+        buf->push_back("7");
+        return;
+    }
+    if (input == "1000")
+    {
+        buf->push_back("8");
+        return;
+    }
+    if (input == "1001")
+    {
+        buf->push_back("9");
+        return;
+    }
+    if (input == "1010")
+    {
+        buf->push_back("A");
+        return;
+    }
+    if (input == "1011")
+    {
+        buf->push_back("B");
+        return;
+    }
+    if (input == "1100")
+    {
+        buf->push_back("C");
+        return;
+    }
+    if (input == "1101")
+    {
+        buf->push_back("D");
+        return;
+    }
+    if (input == "1110")
+    {
+        buf->push_back("E");
+        return;
+    }
+        if (input == "1111")
+    {
+        buf->push_back("F");
+        return;
+    }
+}
 
+bool matchFor4(const std::string_view& input, size_t& read)
+{
+    if (input.length() < 4)
+        return false;
+    if(input.at(0) != '0' && input.at(0) != '1')
+        return false;
+    if(input.at(1) != '0' && input.at(1) != '1')
+        return false;
+    if(input.at(2) != '0' && input.at(2) != '1')
+        return false;
+    if(input.at(3)!= '0' && input.at(3) != '1')
+        return false;
+    read = 4;
+    return true;
+}
+
+void converter()
+{
+    State q0("0-3");
+    State q1("3-7");
+    State q2("8-11");
+    State q3("12-15");
+    State q4("16-19");
+    State q5("20-23");
+    State q6("24-27");
+    State q7("28-31");
+    State F("fin", true);
+    State D("D");
+
+    q0.insertNewEntry(&q1, {matchFor4}, converterOutput);
+    q0.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q1.insertNewEntry(&q2, {matchFor4}, converterOutput);
+    q1.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q2.insertNewEntry(&q3, {matchFor4}, converterOutput);
+    q2.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q3.insertNewEntry(&q4, {matchFor4}, converterOutput);
+    q3.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q4.insertNewEntry(&q5, {matchFor4}, converterOutput);
+    q4.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q5.insertNewEntry(&q6, {matchFor4}, converterOutput);
+    q5.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q6.insertNewEntry(&q7, {matchFor4}, converterOutput);
+    q6.insertNewEntry(&D, {matchAny}, nullptr);
+
+    q7.insertNewEntry(&F, {matchFor4}, converterOutput);
+    q7.insertNewEntry(&D, {matchAny}, nullptr);
+
+    F.insertNewEntry(&D, {matchAny}, nullptr);
+    D.insertNewEntry(&D, {matchAny}, nullptr);
+
+    FSM sm("converter", &q0);
+
+    {
+        std::string test("00000001001000110100010101100110");
+        printf("Check string %s: ", test.c_str());
+        CHECK_FSM_RESULT(sm.execute(test));
+        for (auto s : sm.output) std::cout << s;
+        std::cout << std::endl;
+    }
 }
 
 
 int main()
 {
     //bitFlipperExample();
-    emailValidatorExample();
+    //emailValidatorExample();
+    converter();
     return 0;
 }
