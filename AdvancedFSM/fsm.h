@@ -14,12 +14,6 @@ namespace SML
         FSM_NO_ERROR
     };
 
-    enum class FSMBool
-    {
-        FSM_FALSE,
-        FSM_TRUE
-    };
-
     class State;
 
     using outputBuffer = std::vector<std::string>;
@@ -39,9 +33,9 @@ namespace SML
     class State {
     public:
         std::string name;
-        FSMBool isFinal;
+        bool isFinal;
         transitionTable table;
-        State(std::string name, FSMBool isFinal = FSMBool::FSM_FALSE);       
+        State(std::string name, bool isFinal = false);       
         void insertNewEntry(
             State* nextState,
             std::vector<inputMatchFn> mFns,
@@ -57,7 +51,7 @@ namespace SML
         outputBuffer output;
         State* initialState;
         State* currentState;
-        FSMBool result;
+        bool result;
         FSM(std::string name, State* initState);
 
         const transitionTableEntry* findTransition(const std::string& inputString);

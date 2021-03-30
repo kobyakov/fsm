@@ -20,7 +20,7 @@
 
 namespace SML
 {
-    State::State(std::string name, FSMBool isFinal) 
+    State::State(std::string name, bool isFinal) 
         : name(name), 
           isFinal(isFinal),
           table()
@@ -37,7 +37,7 @@ namespace SML
         this->name = FSMName;
         this->initialState = initState;
         this->currentState = initialState;
-        this->result = FSMBool::FSM_FALSE;
+        this->result = false;
     }
 
     const transitionTableEntry* FSM::findTransition(const std::string& inputString)
@@ -47,13 +47,17 @@ namespace SML
             const std::vector<inputMatchFn> &inputFunctions = row.inputMatchFunctions;
             size_t read = 0;
             bool isMatched = false;
-            const std::string_view substring = inputString.substr(this->currentCursor);
+            //debug_printf("Current cursor: %zu\n", this->currentCursor);
+
+            const std::string_view substring = std::string_view(inputString).substr(this->currentCursor);
+            //std::cout << "String now: " << inputString << " Cursor now: " << this->currentCursor << std::endl;
+            //std::cout << "Substring now: " << substring << std::endl;
             for (const inputMatchFn& fn : inputFunctions)
             {
-                isMatched = fn(substring, read);
+                isMatched = fn(std::string_view(substring), read);
                 if (isMatched)
                 {
-                    debug_printf("Matched: read = %zu", read);
+                    debug_printf("Matched: read = %zu\n", read);
                     break;
                 }
             }
@@ -63,6 +67,7 @@ namespace SML
                 debug_printf("Found transition with next state: %s\n", row.nextState->name.c_str());
                 return &row;
             }
+            debug_printf("Not found transition for next state: %s\n", row.nextState->name.c_str());
         }
         debug_printf("No transition for current state: %s\n", this->currentState->name.c_str());
         return nullptr;
@@ -83,6 +88,7 @@ namespace SML
     FSMError FSM::execute(const std::string& inputString)
     {
         assert(this->initialState);
+        this->currentState = this->initialState;
         this->output.clear();
         this->currentCursor = 0;
         
