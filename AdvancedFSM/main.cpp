@@ -355,11 +355,125 @@ void converter()
     }
 }
 
+void sixDigitsPasswordCheck()
+{
+    State q0("0");
+    State q1("1");
+    State q2("2");
+    State q3("3");
+    State q4("4");
+    State F("fin", true);
+    State D("D");
+
+    q0.insertNewEntry(&q1, {matchFor_09}, produceOutput);
+    q0.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q1.insertNewEntry(&q2, {matchFor_09}, produceOutput);
+    q1.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q2.insertNewEntry(&q3, {matchFor_09}, produceOutput);
+    q2.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q3.insertNewEntry(&q4, {matchFor_09}, produceOutput);
+    q3.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q4.insertNewEntry(&F, {matchFor_09}, produceOutput);
+    q4.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    F.insertNewEntry(&D, {matchAny}, produceOutput);
+    D.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    FSM sm("6digits", &q0);
+
+    {
+        std::string test("050234");
+        printf("Check string %s: ", test.c_str());
+        CHECK_FSM_RESULT(sm.execute(test));
+        for (auto s : sm.output) std::cout << s;
+        std::cout << std::endl;
+    }
+}
+
+bool matchDay(const std::string_view& input, size_t& read)
+{
+    if (input.length() < 2)
+        return false;
+    int day = (input.at(0) - '0') * 10 + (input.at(1) - '0');
+    read = 2;
+    return (day >= 1 && day <= 31);
+}
+
+bool matchMonth(const std::string_view& input, size_t& read)
+{
+    if (input.length() < 2)
+        return false;
+    int month = (input.at(0) - '0') * 10 + (input.at(1) - '0');
+    read = 2;
+    return (month >= 1 && month <= 12);
+}
+
+bool matchYear(const std::string_view& input, size_t& read)
+{
+    if (input.length() < 4)
+        return false;
+    read = 4;
+    return true;
+}
+
+void specialPasswordCheck()
+{
+    State q0("0");
+    State q1("1");
+    State q2("2");
+    State q3("3");
+    State q4("45");
+    State q5("67");
+    State q6("89AB");
+    State F("fin", true);
+    State D("D");
+
+    q0.insertNewEntry(&q1, {matchFor_az, matchFor_AZ}, produceOutput);
+    q0.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q1.insertNewEntry(&q2, {matchFor_az, matchFor_AZ}, produceOutput);
+    q1.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q2.insertNewEntry(&q3, {matchFor_az, matchFor_AZ}, produceOutput);
+    q2.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q3.insertNewEntry(&q4, {matchFor_az, matchFor_AZ}, produceOutput);
+    q3.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q4.insertNewEntry(&q5, {matchDay}, produceOutput);
+    q4.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q5.insertNewEntry(&q6, {matchMonth}, produceOutput);
+    q5.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    q6.insertNewEntry(&q6, {matchYear}, produceOutput);
+    q5.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    F.insertNewEntry(&D, {matchAny}, produceOutput);
+    D.insertNewEntry(&D, {matchAny}, produceOutput);
+
+    FSM sm("6digits", &q0);
+
+    {
+        std::string test("adbd01011991");
+        printf("Check string %s: ", test.c_str());
+        CHECK_FSM_RESULT(sm.execute(test));
+        for (auto s : sm.output) std::cout << s;
+        std::cout << std::endl;
+    }
+}
+
+
 
 int main()
 {
-    //bitFlipperExample();
-    //emailValidatorExample();
+    bitFlipperExample();
+    emailValidatorExample();
     converter();
+    sixDigitsPasswordCheck();
     return 0;
 }
